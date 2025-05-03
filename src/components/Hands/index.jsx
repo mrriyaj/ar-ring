@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Hands, HAND_CONNECTIONS, VERSION } from "@mediapipe/hands";
-import { drawConnectors, drawLandmarks, lerp } from "@mediapipe/drawing_utils";
+import { Hands, VERSION } from "@mediapipe/hands";
 
 import "./index.scss";
 
@@ -40,10 +39,10 @@ const HandsContainer = () => {
       });
 
       hands.setOptions({
-        maxNumHands: 2,
+        maxNumHands: 1,
         modelComplexity: 1,
-        minDetectionConfidence: 0.5,
-        minTrackingConfidence: 0.5,
+        minDetectionConfidence: 0.7, // change this according to your preferred size
+        minTrackingConfidence: 0.7, // change this according to your preferred size
       });
 
       hands.onResults(onResults);
@@ -64,7 +63,7 @@ const HandsContainer = () => {
 
   // Initialize the image and set the src
   const ringImage = new Image();
-  ringImage.src = "pink.png";
+  ringImage.src = "ringImage.png";
 
   // Set a flag to indicate whether the image has loaded
   let isRingImageLoaded = false;
@@ -98,8 +97,6 @@ const HandsContainer = () => {
           index < results.multiHandLandmarks.length;
           index++
         ) {
-          const classification = results.multiHandedness[index];
-          const isRightHand = classification.label === "Right";
           const landmarks = results.multiHandLandmarks[index];
 
           // Only select landmarks for the ring finger (MCP and PIP joints)
@@ -107,16 +104,6 @@ const HandsContainer = () => {
             landmarks[13], // MCP joint
             landmarks[14], // PIP joint
           ];
-
-          // Draw connectors and landmarks for the ring finger
-          drawConnectors(contextRef.current, ringFingerLandmarks, [[0, 1]], {
-            color: isRightHand ? "#00FF00" : "#FF0000",
-          });
-          drawLandmarks(contextRef.current, ringFingerLandmarks, {
-            color: isRightHand ? "#00FF00" : "#FF0000",
-            fillColor: isRightHand ? "#FF0000" : "#00FF00",
-            radius: (data) => lerp(data.from?.z ?? 0, -0.15, 0.1, 10, 1),
-          });
 
           // Check if ring image is loaded before drawing
           if (isRingImageLoaded) {
